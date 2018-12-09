@@ -1,40 +1,48 @@
-/*
-   DIGF 2004 Atelier 1
-   Kate Hartman
-   Experiment 3 - Study 7
-   Arduino to P5.js or Processing - sending value for (3) analog sensors
+#include <NewPing.h>
 
-   Circuit: 
-   resistive materials (sensors) connected to pins A0, A1, A2 using voltage divider circuits  
-*/
+#define TRIGGER_PIN  8  
+#define ECHO_PIN     11  
+#define MAX_DISTANCE 400 
 
-int sensor1val;
-int sensor2val;
+int brightness = 0;     
+const byte RedLED = 9;                 
+int invertedbrightness = 0;
 
+// Variables:-
+long lDistancecm;                       
+unsigned long mS;                       
+unsigned long median_uS;                
 
-void setup() {
-  //start serial connection
-  Serial.begin(9600);
+NewPing sonar(TRIGGER_PIN, ECHO_PIN, MAX_DISTANCE); // NewPing setup of pins and maximum distance.
+
+void setup() 
+{
+    pinMode(RedLED, OUTPUT);
+  Serial.begin(9600); 
 }
 
-void loop() {
-  // read the sensor value
-  sensor1val = analogRead(0);
-  // print out the sensor value
-  Serial.print(sensor1val);
-  // print a comma to separate the values
-  Serial.print(",");
+void loop() 
+{
+  delay(50);                      
+  unsigned int uS = sonar.ping(); 
+  Serial.print("Ping: ");
+  Serial.print(uS / US_ROUNDTRIP_CM); 
+  Serial.println("cm");
+  
+  median_uS = sonar.ping_median(5);  
 
-  // read the sensor value
-  sensor2val = analogRead(1);
-  // print out the sensor value
-  Serial.print(sensor2val);
-  // print a comma to separate the values
-  Serial.print(",");
+    lDistancecm = sonar.convert_cm(median_uS); 
+    
+    {
+        brightness = (byte)map(lDistancecm, 5, 400, 255, 0);
+        if (lDistancecm = 0){ 
+          brightness = 0;
 
-
-
-  delay(1); // the delay is necessary for the serial communication
-
-
+         }else{
+         invertedbrightness = 255 - brightness;
+         analogWrite(RedLED, invertedbrightness);               
+        }
+   
+    }
+    delay(50);                                .
 }
